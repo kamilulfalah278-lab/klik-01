@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLIK-K - Full App Flow</title>
+    <style>
+        :root {
+            --primary-orange: #d35400;
+            --secondary-orange: #e67e22;
+        }
+
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Arial', sans-serif; background: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .mobile-frame { width: 360px; height: 740px; background: white; border-radius: 30px; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+
+        .page { display: none; height: 100%; width: 100%; flex-direction: column; overflow-y: auto; background: white; position: absolute; top: 0; left: 0; }
+        .active-page { display: flex; }
+
+        /* --- DEKORASI --- */
+        .bg-circle { position: absolute; background-color: #fff9c4; border-radius: 50%; z-index: 0; opacity: 0.7; }
+        .c1 { width: 120px; height: 120px; top: -40px; right: -40px; }
+        .c2 { width: 100px; height: 100px; top: 20%; left: -50px; }
+
+        /* --- LANDING PAGE --- */
+        #landing-page { justify-content: space-between; padding: 40px 25px; text-align: center; box-sizing: border-box; }
+        .logo-circle { background-color: var(--primary-orange); width: 110px; height: 110px; border-radius: 50%; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
+        .brand-name { font-size: 32px; font-weight: bold; margin: 15px 0 5px; }
+        .brand-name span { color: var(--secondary-orange); }
+        .btn-start { background-color: #8d5555; color: white; border: none; padding: 16px; width: 100%; border-radius: 40px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .skip-text { display: block; margin-top: 15px; color: #333; text-decoration: none; font-size: 16px; font-weight: 500; cursor: pointer; }
+
+        /* --- AUTH STYLE --- */
+        .form-container { padding: 20px; text-align: center; z-index: 1; position: relative; }
+        .form-title { color: var(--primary-orange); font-size: 42px; margin: 40px 0; }
+        input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #444; background-color: #e0e0e0; border-radius: 5px; box-sizing: border-box; }
+        .btn-red { background-color: #ff0000; color: white; border: none; padding: 12px 45px; font-weight: bold; font-size: 16px; box-shadow: 4px 4px 0px #8b0000; cursor: pointer; }
+        .back-button { position: absolute; top: 20px; left: 20px; font-size: 24px; color: #333; background: none; border: none; cursor: pointer; z-index: 10; }
+
+        /* --- DASHBOARD UI --- */
+        .header-nav { padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #eee; justify-content: space-between; }
+        .user-profile { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+        .profile-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+
+        .promo-banner { margin: 15px; padding: 20px; border-radius: 15px; text-align: center; animation: colorChange 8s infinite alternate; display: flex; flex-direction: column; align-items: center; }
+        .logo-container { background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        @keyframes colorChange {
+            0% { background-color: #f5b7b1; }
+            33% { background-color: #aed6f1; }
+            66% { background-color: #f9e79f; }
+            100% { background-color: #edbb99; }
+        }
+
+        /* --- SEARCH PAGE STYLE (FOTO SPESIAL) --- */
+        .section-title { padding: 0 20px; font-weight: bold; font-size: 16px; margin-top: 15px; margin-bottom: 10px; }
+        .horizontal-scroll { display: flex; overflow-x: auto; gap: 15px; padding: 10px 20px; scrollbar-width: none; }
+        .horizontal-scroll::-webkit-scrollbar { display: none; }
+        .special-card { min-width: 160px; position: relative; }
+        .special-card img { width: 160px; height: 110px; border-radius: 15px; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .special-card p { margin: 5px 0; font-size: 13px; font-weight: bold; }
+        .time-tag { position: absolute; bottom: 35px; right: 8px; background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 10px; font-size: 10px; color: #555; }
+
+        /* --- TAB & LIST --- */
+        .category-tabs { display: flex; justify-content: space-around; border-bottom: 1px solid #eee; background: white; }
+        .tab { padding: 12px; font-weight: bold; cursor: pointer; color: #888; border-bottom: 3px solid transparent; }
+        .tab.active { color: red; border-bottom: 3px solid red; }
+
+        .food-card { display: flex; padding: 15px; border-bottom: 1px solid #f0f0f0; align-items: center; }
+        .food-img { width: 75px; height: 75px; border-radius: 10px; object-fit: cover; margin-right: 15px; }
+        .btn-tambah { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+        /* PROFILE PAGE STYLE */
+        .profile-main { text-align: center; padding: 20px; }
+        .profile-pic-large { width: 150px; height: 150px; border-radius: 50%; border: 3px solid #eee; object-fit: cover; }
+        .btn-edit-profil { background: #eee; border: 1px solid #ccc; padding: 4px 15px; font-size: 11px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        .menu-list { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .menu-item { background: #d9d9d9; padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-decoration: none; color: #551a1a; font-weight: bold; font-size: 14px; border: 1px solid #999; }
+        .btn-logout { background: #ff0000; color: white; border: none; padding: 10px 40px; border-radius: 5px; font-weight: bold; cursor: pointer; align-self: center; margin-top: 50px; box-shadow: 2px 2px 0px #8b0000; }
+
+        /* HISTORY PAGE */
+        .history-box { border: 1px solid #ccc; margin: 20px; min-height: 300px; border-radius: 5px; padding: 15px; }
+        .history-title { font-weight: bold; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+
+        .text-green { color: #2ecc71; font-weight: bold; }
+
+        /* CHECKOUT PAGES */
+        .detail-img-container { padding: 20px; text-align: center; }
+        .detail-img { width: 220px; height: 160px; border: 3px solid orange; border-radius: 10px; object-fit: cover; }
+        .action-row { display: flex; gap: 10px; padding: 15px 20px; justify-content: center; align-items: center; }
+        .btn-status { padding: 8px 15px; border-radius: 20px; border: none; font-weight: bold; font-size: 11px; cursor: pointer; transition: 0.3s; }
+        .preorder-off { background: #e0e0e0; color: #888; }
+        .preorder-on { background: #ff0000; color: white; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
+        .select-delivery { background: orange; color: black; border: none; padding: 8px 10px; border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; outline: none; }
+        .summary-table { width: 100%; padding: 15px 20px; border-top: 1px solid #eee; font-size: 13px; }
+        .btn-checkout-main { background: #ffbc40; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; position: absolute; bottom: 70px; }
+        .success-overlay { display: none; position: absolute; top: 25%; left: 10%; width: 80%; background: #ffbc40; padding: 30px; border-radius: 15px; text-align: center; z-index: 200; }
+
+        /* --- NAVBAR BAWAH --- */
+        .bottom-nav { height: 70px; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; background: white; position: absolute; bottom: 0; width: 100%; }
+        .nav-custom-img { width: 28px; height: 28px; object-fit: contain; cursor: pointer; }
+        .badge { position: absolute; top: 15px; right: 20%; background: red; color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+
+<div class="mobile-frame">
+    
+    <div id="landing-page" class="page active-page">
+        <div class="top-section">
+            <div class="logo-circle"><img src="https://cdn-icons-png.flaticon.com/512/1046/1046748.png" width="65"></div>
+            <h1 class="brand-name">KLIK-<span>K</span></h1>
+            <p>Pesan & Ambil, Semua Lebih Mudah!</p>
+        </div>
+        <img src="landing.png" width="250" style="margin: 0 auto;" onerror="this.src='https://via.placeholder.com/250x150?text=KLIK-K'">
+        <div class="bottom-section">
+            <button class="btn-start" onclick="navigateTo('signup-page')">Mulai Sekarang!</button>
+            <a class="skip-text" onclick="navigateTo('login-page')">Lewati ></a>
+        </div>
+    </div>
+
+    <div id="signup-page" class="page">
+        <button class="back-button" onclick="navigateTo('landing-page')">❮</button>
+        <div class="bg-circle c1"></div><div class="bg-circle c2"></div>
+        <div class="form-container">
+            <h1 class="form-title">Sign Up</h1>
+            <input type="text" id="username-input" placeholder="nama lengkap">
+            <input type="email" placeholder="alamat email">
+            <input type="password" placeholder="password">
+            <button class="btn-red" onclick="handleSignUp()">Sign Up</button>
+            <p onclick="navigateTo('login-page')" style="color:blue; cursor:pointer; margin-top:15px;">already a customer? sign in</p>
+        </div>
+    </div>
+
+    <div id="login-page" class="page">
+        <button class="back-button" onclick="navigateTo('landing-page')">❮</button>
+        <div class="form-container">
+            <h1 class="form-title">Log In</h1>
+            <input type="email" placeholder="alamat email">
+            <input type="password" placeholder="password">
+            <button class="btn-red" onclick="navigateTo('dashboard-page')">Sign In</button>
+        </div>
+    </div>
+
+    <div id="dashboard-page" class="page">
+        <div class="header-nav">
+            <div class="user-profile">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="profile-img">
+                <div><span id="display-user" class="text-green" style="text-transform: uppercase;">HI, NAJIB</span><br>Apakah Kamu Lapar?</div>
+            </div>
+        </div>
+        <div class="promo-banner">
+            <div class="logo-container"><img src="https://cdn-icons-png.flaticon.com/512/1046/1046748.png" width="40"></div>
+            <h2 style="margin:0; color: #333;">KLIK-<span style="color:var(--secondary-orange);">K</span></h2>
+            <p style="margin:5px 0 0 0; font-size:12px; color: #555; font-weight: bold;">Pesan & Ambil, Semua Lebih Mudah!</p>
+        </div>
+        <div class="category-tabs">
+            <div class="tab active" onclick="switchTab('makanan', this, 'product-list')">makanan</div>
+            <div class="tab" onclick="switchTab('snack', this, 'product-list')">snack</div>
+            <div class="tab" onclick="switchTab('minuman', this, 'product-list')">minuman</div>
+        </div>
+        <div id="product-list" style="padding-bottom: 80px;"></div>
+        <div class="bottom-nav">
+            <img src="dashboard.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1946/1946436.png'" class="nav-custom-img" onclick="navigateTo('dashboard-page')">
+            <img src="pencari.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/684/684908.png'" class="nav-custom-img" onclick="navigateTo('search-page')">
+            <div style="position:relative;"><img src="keranjang.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1170/1170678.png'" class="nav-custom-img" onclick="navigateTo('cart-page')"><span class="badge cart-count">0</span></div>
+            <img src="profil.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1077/1077063.png'" class="nav-custom-img" onclick="navigateTo('profile-page')">
+        </div>
+    </div>
+
+    <div id="search-page" class="page">
+        <div class="header-nav">
+            <div class="user-profile">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="profile-img">
+                <div><b class="text-green">HI, NAJIB</b><br><small>Hasil Pencarian...</small></div>
+            </div>
+        </div>
+        <div class="section-title" id="special-title">Spesial Makanan...</div>
+        <div class="horizontal-scroll" id="special-container"></div>
+        <div class="category-tabs">
+            <div class="tab active" onclick="switchTab('makanan', this, 'search-list')">makanan</div>
+            <div class="tab" onclick="switchTab('snack', this, 'search-list')">snack</div>
+            <div class="tab" onclick="switchTab('minuman', this, 'search-list')">minuman</div>
+        </div>
+        <div id="search-list" style="padding-bottom: 80px;"></div>
+        <div class="bottom-nav">
+            <img src="https://cdn-icons-png.flaticon.com/512/1946/1946436.png" class="nav-custom-img" onclick="navigateTo('dashboard-page')">
+            <img src="pencari.png" class="nav-custom-img" onclick="navigateTo('search-page')">
+            <div style="position:relative;"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" class="nav-custom-img" onclick="navigateTo('cart-page')"><span class="badge cart-count">0</span></div>
+            <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" class="nav-custom-img" onclick="navigateTo('profile-page')">
+        </div>
+    </div>
+
+    <div id="cart-page" class="page">
+        <div class="header-nav">
+            <span onclick="navigateTo('dashboard-page')" style="cursor:pointer; font-weight:bold;">❮ Kembali</span>
+            <span class="text-green" style="font-weight:bold;">KERANJANG</span>
+        </div>
+        <div id="cart-items" style="flex:1; padding: 15px; padding-bottom: 150px;"></div>
+        <div style="padding: 20px; border-top: 1px solid #eee; position: absolute; bottom: 70px; width: 100%; background: white;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <b>Total:</b>
+                <b>Rp. <span id="cart-total">0</span></b>
+            </div>
+            <button class="btn-red" style="width:100%;" onclick="goToProductDetail()">KONFIRMASI</button>
+        </div>
+        <div class="bottom-nav">
+            <img src="https://cdn-icons-png.flaticon.com/512/1946/1946436.png" class="nav-custom-img" onclick="navigateTo('dashboard-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" class="nav-custom-img" onclick="navigateTo('search-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" class="nav-custom-img" onclick="navigateTo('cart-page')" style="filter: invert(20%) sepia(90%) saturate(3000%) hue-rotate(350deg);">
+            <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" class="nav-custom-img" onclick="navigateTo('profile-page')">
+        </div>
+    </div>
+
+    <div id="product-detail-page" class="page">
+        <div class="header-nav"><span onclick="navigateTo('cart-page')" style="cursor:pointer">← Detail Pesanan</span></div>
+        
+        <div style="padding: 20px; max-height: 300px; overflow-y: auto;">
+            <h3>Item yang dipesan:</h3>
+            <div id="detail-items-list"></div>
+        </div>
+
+        <div class="action-row">
+            <button id="preorder-btn" class="btn-status preorder-off" onclick="togglePreOrder()">Pre-Order</button>
+            
+            <select id="delivery-option" class="select-delivery" onchange="updateDelivery()">
+                <option value="2000">Diantar v</option>
+                <option value="0">Ambil Sendiri</option>
+            </select>
+        </div>
+
+        <div class="summary-table">
+            <table style="width:100%">
+                <tr><td>Subtotal Produk:</td><td align="right">Rp. <span id="sub-price">0</span></td></tr>
+                <tr><td>Biaya Pengantaran:</td><td align="right">Rp. <span id="delivery-cost">2000</span></td></tr>
+                <tr style="border-top:1px solid #333; font-weight:bold;">
+                    <td>TOTAL:</td><td align="right">Rp. <span id="total-price">0</span></td></tr>
+            </table>
+        </div>
+        
+        <div style="text-align:center; margin-top:10px; padding-bottom: 80px;">
+            <button style="background:red; color:white; border:none; padding:12px 25px; border-radius:5px; font-weight:bold; cursor:pointer;" onclick="goToCheckout()">LANJUT PEMBAYARAN</button>
+        </div>
+
+        <div class="bottom-nav">
+            <img src="https://cdn-icons-png.flaticon.com/512/1946/1946436.png" class="nav-custom-img" onclick="navigateTo('dashboard-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" class="nav-custom-img" onclick="navigateTo('search-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" class="nav-custom-img" onclick="navigateTo('cart-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" class="nav-custom-img" onclick="navigateTo('profile-page')">
+        </div>
+    </div>
+
+    <div id="checkout-page" class="page">
+        <div class="header-nav"><span onclick="navigateTo('product-detail-page')" style="cursor:pointer">←</span> <b>Pembayaran</b></div>
+        <div style="padding:20px;">
+            <div style="margin-bottom:15px;"><input type="radio" name="payment" checked> Cash On Delivery</div>
+            <div style="margin-bottom:15px;"><input type="radio" name="payment"> E-Wallet</div>
+            
+            <p><b>Pesanan:</b></p>
+            <div id="checkout-items-list" style="max-height: 250px; overflow-y: auto;"></div>
+            
+            <div style="margin-top:20px; font-size:12px;">
+                <p>Dikirim ke: <span id="location-tag" style="float:right; background:#eee; padding:2px 8px;">GEDUNG 1</span></p>
+                <b>M Ainun Najib, Bisnis Digital - A<br>Semester 5, Ruang F</b>
+            </div>
+            
+            <div style="margin-top:20px; padding:15px; background:#f9f9f9; border-radius:8px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span>Subtotal:</span>
+                    <span>Rp. <span id="checkout-subtotal">0</span></span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span>Biaya Kirim:</span>
+                    <span>Rp. <span id="checkout-delivery">0</span></span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-weight:bold; border-top:1px solid #ccc; padding-top:5px;">
+                    <span>TOTAL:</span>
+                    <span>Rp. <span id="checkout-total">0</span></span>
+                </div>
+            </div>
+        </div>
+        <button class="btn-checkout-main" onclick="confirmPayment()">BAYAR SEKARANG</button>
+        
+        <div id="success-overlay" class="success-overlay">
+            <div style="background:white; width:40px; height:40px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px">✔️</div>
+            <h3 style="margin:0">PESANAN SELESAI</h3>
+            <p style="font-size:11px; margin-top:15px;">Pesanan Anda sedang diproses</p>
+            <button onclick="finishOrder()" style="background:white; border:2px solid #333; padding:8px 20px; border-radius:5px; cursor:pointer; margin-top:10px;">Lihat Riwayat</button>
+        </div>
+
+        <div class="bottom-nav">
+            <img src="https://cdn-icons-png.flaticon.com/512/1946/1946436.png" class="nav-custom-img" onclick="navigateTo('dashboard-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" class="nav-custom-img" onclick="navigateTo('search-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" class="nav-custom-img" onclick="navigateTo('cart-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" class="nav-custom-img" onclick="navigateTo('profile-page')">
+        </div>
+    </div>
+
+    <div id="profile-page" class="page">
+        <div class="header-nav">
+            <div class="user-profile">
+                <img src="profil_user.png" class="profile-img" onerror="this.src='https://via.placeholder.com/45'">
+                <div><span class="text-green u-name">HI, NAJIB</span><br><span class="text-green">Apakah Kamu Lapar?</span></div>
+            </div>
+            <div onclick="navigateTo('dashboard-page')" style="cursor:pointer; font-size:20px;">←</div>
+        </div>
+        
+        <div class="profile-main">
+            <img src="profil_user.png" class="profile-pic-large" onerror="this.src='https://via.placeholder.com/150'">
+            <br>
+            <button class="btn-edit-profil">Edit Profil</button>
+        </div>
+
+        <div class="menu-list">
+            <div class="menu-item" onclick="navigateTo('history-page')">
+                <span>Riwayat Pesanan</span> <span>></span>
+            </div>
+            <div class="menu-item">
+                <span>Keamanan</span> <span>></span>
+            </div>
+            
+            <button class="btn-logout" onclick="alert('Logout Berhasil'); navigateTo('landing-page');">Logout</button>
+        </div>
+
+        <div class="bottom-nav">
+            <img src="https://cdn-icons-png.flaticon.com/512/1946/1946436.png" class="nav-custom-img" onclick="navigateTo('dashboard-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" class="nav-custom-img" onclick="navigateTo('search-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" class="nav-custom-img" onclick="navigateTo('cart-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/1077/1077041.png" class="nav-custom-img" style="filter: invert(20%) sepia(90%) saturate(3000%) hue-rotate(350deg);">
+        </div>
+    </div>
+
+    <div id="history-page" class="page">
+        <div class="header-nav">
+            <div class="user-profile">
+                <img src="profil_user.png" class="profile-img" onerror="this.src='https://via.placeholder.com/45'">
+                <div><span class="text-green u-name">HI, NAJIB</span><br><span class="text-green">Apakah Kamu Lapar?</span></div>
+            </div>
+            <div onclick="navigateTo('profile-page')" style="cursor:pointer; font-size:20px;">←</div>
+        </div>
+
+        <div class="history-box">
+            <div class="history-title">Pesanan Saya</div>
+            <div id="history-list">
+                <p style="color:#999; font-size:12px;">Belum ada pesanan...</p>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <img src="https://cdn-icons-png.flaticon.com/512/1946/1946436.png" class="nav-custom-img" onclick="navigateTo('dashboard-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" class="nav-custom-img" onclick="navigateTo('search-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" class="nav-custom-img" onclick="navigateTo('cart-page')">
+            <img src="https://cdn-icons-png.flaticon.com/512/1077/1077041.png" class="nav-custom-img" onclick="navigateTo('profile-page')">
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentUserName = "NAJIB";
+    let cart = [];
+    let history = [];
+    let isPreOrder = false;
+    let deliveryCost = 2000;
+
+    const data = {
+        makanan: {
+            special: [
+                { name: "Nasi Pecel", time: "15 min", img: "pecel.JPEG" },
+                { name: "Soto Ayam", time: "20 min", img: "soto.JPEG" },
+                { name: "Nasi Goreng", time: "10 min", img: "nasi goreng.JPEG" }
+            ],
+            list: [
+                { id: 1, name: "Nasi Uduk", price: 7000, img: "uduk.JPEG" },
+                { id: 2, name: "Mie Ayam", price: 10000, img: "mie ayam.JPEG" },
+                { id: 7, name: "Nasi Pecel", price: 7000, img: "pecel.JPEG" }
+            ]
+        },
+        snack: {
+            special: [
+                { name: "Risol Mayo", time: "5 min", img: "risol.JPEG" },
+                { name: "Tempe Mendoan", time: "5 min", img: "tempe.JPEG" }
+            ],
+            list: [
+                { id: 3, name: "Donat", price: 3000, img: "donat.JPEG" },
+                { id: 4, name: "Seblak", price: 15000, img: "seblak.JPEG" }
+            ]
+        },
+        minuman: {
+            special: [
+                { name: "Es Jeruk", time: "3 min", img: "esjeruk.JPEG" },
+                { name: "Es Teh Manis", time: "2 min", img: "esteh.JPEG" }
+            ],
+            list: [
+                { id: 5, name: "Kopi Hitam", price: 5000, img: "kopi.JPEG" },
+                { id: 6, name: "Air Mineral", price: 3000, img: "air.JPEG" }
+            ]
+        }
+    };
+
+    function navigateTo(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+        document.getElementById(id).classList.add('active-page');
+        if(id === 'dashboard-page') switchTab('makanan', document.querySelector('#dashboard-page .tab'), 'product-list');
+        if(id === 'search-page') switchTab('makanan', document.querySelector('#search-page .tab'), 'search-list');
+    }
+
+    function handleSignUp() {
+        const val = document.getElementById('username-input').value;
+        if(val) currentUserName = val;
+        updateUserName();
+        alert("Berhasil!"); 
+        navigateTo('login-page');
+    }
+
+    function updateUserName() {
+        document.getElementById('display-user').innerText = "HI, " + currentUserName;
+        document.querySelectorAll('.u-name').forEach(el => el.innerText = "HI, " + currentUserName);
+    }
+
+    function switchTab(cat, el, listId) {
+        el.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+
+        if(listId === 'search-list') {
+            const titleMap = { makanan: "Spesial Makanan...", snack: "Cemilan Mantap...", minuman: "Segar-Segar..." };
+            document.getElementById('special-title').innerText = titleMap[cat];
+            const specCont = document.getElementById('special-container');
+            specCont.innerHTML = '';
+            data[cat].special.forEach(s => {
+                specCont.innerHTML += `
+                    <div class="special-card">
+                        <img src="${s.img}" onerror="this.src='https://via.placeholder.com/160x110'">
+                        <div class="time-tag">${s.time}</div>
+                        <p>${s.name}</p>
+                    </div>`;
+            });
+        }
+
+        const container = document.getElementById(listId);
+        container.innerHTML = '';
+        data[cat].list.forEach(p => {
+            container.innerHTML += `
+                <div class="food-card">
+                    <img src="${p.img}" class="food-img" onerror="this.src='https://via.placeholder.com/75'">
+                    <div style="flex:1"><b>${p.name}</b><br><span style="color:red; font-weight:bold;">Rp ${p.price.toLocaleString()}</span></div>
+                    <button class="btn-tambah" onclick="addToCart(${p.id}, '${cat}')">Tambah</button>
+                </div>`;
+        });
+    }
+
+    function addToCart(id, cat) {
+        const item = data[cat].list.find(x => x.id === id);
+        cart.push(item);
+        updateCart();
+        alert(item.name + " ditambah ke keranjang!");
+    }
+
+    function updateCart() {
+        document.querySelectorAll('.cart-count').forEach(el => el.innerText = cart.length);
+        const cartItems = document.getElementById('cart-items');
+        const totalEl = document.getElementById('cart-total');
+        cartItems.innerHTML = '';
+        let total = 0;
+        cart.forEach(c => {
+            total += c.price;
+            cartItems.innerHTML += `<div class="food-card"><img src="${c.img}" class="food-img" onerror="this.src='https://via.placeholder.com/75'"><div style="flex:1;"><b>${c.name}</b><br><span style="color:red; font-weight:bold;">Rp ${c.price.toLocaleString()}</span></div></div>`;
+        });
+        totalEl.innerText = total.toLocaleString('id-ID');
+    }
+
+    function goToProductDetail() {
+        if(cart.length === 0) return alert("Keranjang kosong!");
+        
+        const detailList = document.getElementById('detail-items-list');
+        detailList.innerHTML = '';
+        let subtotal = 0;
+        
+        cart.forEach(item => {
+            subtotal += item.price;
+            detailList.innerHTML += `
+                <div style="background:#f9f9f9; padding:10px; border-radius:8px; display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                    <img src="${item.img}" width="60" height="60" style="border-radius:5px" onerror="this.src='https://via.placeholder.com/60'">
+                    <div style="flex:1;">
+                        <b>${item.name}</b><br>
+                        <span style="color:red; font-weight:bold;">Rp ${item.price.toLocaleString()}</span>
+                    </div>
+                </div>`;
+        });
+        
+        document.getElementById('sub-price').innerText = subtotal.toLocaleString();
+        updateDelivery();
+        navigateTo('product-detail-page');
+    }
+
+    function togglePreOrder() {
+        const btn = document.getElementById('preorder-btn');
+        isPreOrder = !isPreOrder;
+        btn.className = isPreOrder ? 'btn-status preorder-on' : 'btn-status preorder-off';
+    }
+
+    function updateDelivery() {
+        const option = document.getElementById('delivery-option');
+        deliveryCost = parseInt(option.value);
+        
+        let subtotal = 0;
+        cart.forEach(item => subtotal += item.price);
+        
+        document.getElementById('delivery-cost').innerText = deliveryCost.toLocaleString();
+        document.getElementById('total-price').innerText = (subtotal + deliveryCost).toLocaleString();
+    }
+
+    function goToCheckout() {
+        const option = document.getElementById('delivery-option');
+        const methodText = option.options[option.selectedIndex].text.replace(' v', '').toUpperCase();
+        
+        const checkoutList = document.getElementById('checkout-items-list');
+        checkoutList.innerHTML = '';
+        
+        let subtotal = 0;
+        cart.forEach(item => {
+            subtotal += item.price;
+            checkoutList.innerHTML += `
+                <div style="background:#f9f9f9; padding:10px; border-radius:8px; display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                    <img src="${item.img}" width="60" height="60" style="border-radius:5px" onerror="this.src='https://via.placeholder.com/60'">
+                    <div style="flex:1;">
+                        <b>${item.name}</b><br>
+                        ${isPreOrder ? '<span style="color:red; font-size:10px; font-weight:bold;">PRE-ORDER</span><br>' : ''}
+                        <span style="color:orange; font-size:10px; font-weight:bold;">${methodText}</span><br>
+                        <span style="color:red; font-weight:bold;">Rp ${item.price.toLocaleString()}</span>
+                    </div>
+                </div>`;
+        });
+        
+        document.getElementById('checkout-subtotal').innerText = subtotal.toLocaleString();
+        document.getElementById('checkout-delivery').innerText = deliveryCost.toLocaleString();
+        document.getElementById('checkout-total').innerText = (subtotal + deliveryCost).toLocaleString();
+        
+        document.getElementById('location-tag').parentElement.style.opacity = (methodText === "AMBIL SENDIRI") ? "0.3" : "1";
+        
+        navigateTo('checkout-page');
+    }
+
+    function confirmPayment() {
+        document.getElementById('success-overlay').style.display = 'block';
+    }
+
+    function finishOrder() {
+        const orderDate = new Date().toLocaleString('id-ID');
+        const option = document.getElementById('delivery-option');
+        const methodText = option.options[option.selectedIndex].text.replace(' v', '');
+        
+        let subtotal = 0;
+        cart.forEach(item => subtotal += item.price);
+        
+        history.push({ 
+            items: [...cart], 
+            date: orderDate, 
+            isPreOrder: isPreOrder,
+            deliveryMethod: methodText,
+            deliveryCost: deliveryCost,
+            total: subtotal + deliveryCost
+        });
+        
+        cart = [];
+        isPreOrder = false;
+        deliveryCost = 2000;
+        updateCart();
+        updateHistoryUI();
+        
+        document.getElementById('success-overlay').style.display = 'none';
+        document.getElementById('preorder-btn').className = 'btn-status preorder-off';
+        document.getElementById('delivery-option').value = "2000";
+        
+        navigateTo('history-page');
+    }
+
+    function updateHistoryUI() {
+        const histCont = document.getElementById('history-list');
+        histCont.innerHTML = '';
+        if(history.length === 0) {
+            histCont.innerHTML = '<p style="color:#999; font-size:12px;">Belum ada pesanan...</p>';
+            return;
+        }
+        [...history].reverse().forEach(order => {
+            let itemNames = order.items.map(i => i.name).join(', ');
+            histCont.innerHTML += `
+                <div style="border-bottom:1px solid #eee; padding:10px 0; font-size:13px;">
+                    <div style="color:red; font-weight:bold;">Selesai - ${order.date}</div>
+                    <div style="margin-top:5px;">${itemNames}</div>
+                    ${order.isPreOrder ? '<div style="color:red; font-size:11px; margin-top:3px;">⏱ Pre-Order</div>' : ''}
+                    <div style="color:orange; font-size:11px; margin-top:3px;">🛵 ${order.deliveryMethod}</div>
+                    <div style="color:#666; margin-top:5px;">Total: Rp ${order.total.toLocaleString('id-ID')}</div>
+                </div>`;
+        });
+    }
+
+    // Initialize
+    switchTab('makanan', document.querySelector('#dashboard-page .tab'), 'product-list');
+</script>
+
+</body>
+</html>
